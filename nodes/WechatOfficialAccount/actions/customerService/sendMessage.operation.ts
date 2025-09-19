@@ -9,7 +9,7 @@ export const option: INodePropertyOptions = {
 			method: 'POST',
 			url: '/cgi-bin/message/custom/send',
 			body: {
-				customservice: { kf_account: '={{$parameter.kf_account}}' },
+				customservice: '={{$parameter.customservice}}',
 				touser: '={{$parameter.touser}}',
 				msgtype: '={{$parameter.msgtype}}',
 				text: '={{$parameter.text}}',
@@ -30,12 +30,20 @@ export const option: INodePropertyOptions = {
 
 const properties: INodeProperties[] = [
 	{
-		displayName: '客服账号',
-		name: 'kf_account',
-		type: 'string',
-		hint: '注意：是完整客服账号，格式为：账号前缀@公众号微信号，例：test1@test',
+		displayName: '客服信息',
+		name: 'customservice',
+		type: 'collection',
+		default: { kf_account: '' },
 		required: true,
-		default: '',
+		options: [
+			{
+				displayName: '客服账号',
+				name: 'kf_account',
+				type: 'string',
+				hint: '注意：是完整客服账号，格式为：账号前缀@公众号微信号，例：test1@test',
+				default: '',
+			},
+		],
 	},
 	{
 		displayName: '用户OpenID',
