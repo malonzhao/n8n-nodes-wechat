@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-wechat",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This is an n8n-wechat-nodes Library",
   "keywords": [
     "n8n",
@@ -42,8 +42,8 @@
       "dist/credentials/WechatOfficialAccountApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/OfficialAccount/WechatOfficialAccount.node.js",
-      "dist/nodes/OfficialAccount/WechatOfficialAccountTrigger.node.js"
+      "dist/nodes/WechatOfficialAccount/WechatOfficialAccount.node.js",
+      "dist/nodes/WechatOfficialAccount/WechatOfficialAccountTrigger.node.js"
     ]
   },
   "devDependencies": {
