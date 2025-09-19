@@ -1,0 +1,9 @@
+export * as comment from './comment';
+export * as customerService from './customerService';
+export * as draft from './draft';
+export * as material from './material';
+export * as menu from './menu';
+export * as publish from './publish';
+export * as response from './response';
+export * as template from './template';
+export * as user from './user';

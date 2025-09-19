@@ -1,0 +1,71 @@
+{
+  "name": "n8n-nodes-wechat",
+  "version": "1.0.0",
+  "description": "This is an n8n-wechat-nodes Library",
+  "keywords": [
+    "n8n",
+    "n8n-community-node-package",
+    "weixin",
+    "wechat",
+    "official-account",
+    "work"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/malonzhao/n8n-nodes-wechat",
+  "author": {
+    "name": "Malon",
+    "email": "malonzhao@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/malonzhao/n8n-nodes-wechat.git"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "npx rimraf dist && tsc && tsc-alias && gulp build:icons",
+    "dev": "tsc --watch & tsc-alias --watch",
+    "serve": "n8n start",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/WechatOfficialAccountApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/OfficialAccount/WechatOfficialAccount.node.js",
+      "dist/nodes/OfficialAccount/WechatOfficialAccountTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/form-data": "^2.2.1",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.3.0",
+    "@typescript-eslint/parser": "~8.32.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.4.1",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "form-data": "*",
+    "lodash": "*",
+    "n8n-workflow": "^1.105.0"
+  },
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  }
+}
