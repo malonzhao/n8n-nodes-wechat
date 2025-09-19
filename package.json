@@ -42,8 +42,8 @@
       "dist/credentials/WechatOfficialAccountApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/OfficialAccount/WechatOfficialAccount.node.js",
-      "dist/nodes/OfficialAccount/WechatOfficialAccountTrigger.node.js"
+      "dist/nodes/WechatOfficialAccount/WechatOfficialAccount.node.js",
+      "dist/nodes/WechatOfficialAccount/WechatOfficialAccountTrigger.node.js"
     ]
   },
   "devDependencies": {
