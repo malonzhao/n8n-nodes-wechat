@@ -66,6 +66,7 @@
     "n8n-workflow": "^1.105.0"
   },
   "dependencies": {
+    "mime": "^4.1.0",
     "xml-js": "^1.6.11"
   }
 }

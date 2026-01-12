@@ -1,6 +1,7 @@
 import { IExecuteFunctions, IHttpRequestOptions } from 'n8n-workflow';
 import { js2xml, xml2js } from 'xml-js';
 import FormData from 'form-data';
+import mime from 'mime';
 /**
  * 将对象转换为XML格式字符串
  */
@@ -67,35 +68,25 @@ export const getNodeParameters = (ctx: IExecuteFunctions): Record<string, any> =
 	return flattenSameKeyArrays(result);
 };
 
-export const buildUploadOptions = async (
-	ctx: IExecuteFunctions,
-	reqOptions: IHttpRequestOptions,
-) => {
+export const buildUploadOptions = async (ctx: IExecuteFunctions, reqOptions: IHttpRequestOptions) => {
 	if (!reqOptions?.body || !Object.prototype.toString.call(reqOptions.body).includes('Object')) {
 		return reqOptions;
 	}
-	const body = new FormData();
+	const formData = new FormData();
 	for (let k of Object.keys(reqOptions.body)) {
-		let value = (reqOptions.body as Record<string, any>)[k];
+		let v = (reqOptions.body as Record<string, any>)[k];
 		if (k.endsWith('BINARY_PROPERTY_NAME')) {
-			const binaryData = ctx.helpers.assertBinaryData(0, value);
-			const content = Buffer.from(binaryData.data, 'base64');
-			// const contentType = binaryData.mimeType;
-			const knownLength = content.length;
-			const { mimeType: contentType, fileName } = binaryData;
 			const fileField = k.replace('BINARY_PROPERTY_NAME', '');
-			body.append(fileField, content, {
-				contentType,
-				knownLength,
-				filename: fileName,
-			});
+			let { mimeType: contentType, fileName: filename, fileExtension } = ctx.helpers.assertBinaryData(0, v);
+			const binaryData: Buffer = await ctx.helpers.getBinaryDataBuffer(0, v)
+			if (!fileExtension) fileExtension = mime.getExtension(contentType) || ''
+			if (fileExtension) filename = filename?.replace(`.${fileExtension}`, '') + `.${fileExtension}`
+			formData.append(fileField, binaryData, { contentType, filename });
 		} else {
-			body.append(k, JSON.stringify(value), { contentType: 'application/json' });
+			formData.append(k, JSON.stringify(v));
 		}
 	}
-	if (!reqOptions.headers) reqOptions.headers = {};
-	reqOptions.headers['Content-Length'] = body.getLengthSync();
-	reqOptions.headers['Content-Type'] = `multipart/related; boundary=${body.getBoundary()}`;
-	reqOptions.body = body;
+	reqOptions.headers = { ...reqOptions.headers, ...formData.getHeaders() };
+	reqOptions.body = formData;
 	return reqOptions as IHttpRequestOptions;
 };
