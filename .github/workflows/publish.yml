@@ -1,25 +1,77 @@
 name: Publish Package
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build and publish
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+      - name: Build
+        run: npm run build
+
+      - name: Determine version bump
+        id: bump
+        run: |
+          if node update-version.js > bump.txt; then
+            echo "bump=$(cat bump.txt)" >> $GITHUB_OUTPUT
+          else
+            echo "No version bump needed"
+          fi
+
+      - name: Update version
+        if: steps.bump.outputs.bump
+        run: npm version ${{ steps.bump.outputs.bump }} --no-git-tag-version
+
+      - name: Get version
+        id: version
+        if: steps.bump.outputs.bump
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Commit and tag
+        if: steps.bump.outputs.bump
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin main
+          git push origin --tags
+
+      - name: Create Release
+        if: steps.bump.outputs.bump
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## What's Changed
+
+            ${{ github.event.head_commit.message }}
+
+            ### Commits
+            $(git log --oneline --no-merges $(git describe --tags --abbrev=0)..HEAD | sed 's/^/- /')
+          draft: false
+          prerelease: false
+
+      - name: Publish to npm
+        if: steps.bump.outputs.bump
+        run: npm publish --provenance --access public
