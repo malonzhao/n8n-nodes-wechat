@@ -21,12 +21,6 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
       - name: Determine version bump
         id: bump
         run: |
@@ -35,6 +29,13 @@ jobs:
           else
             echo "No version bump needed"
           fi
+      - name: Install dependencies
+        if: steps.bump.outputs.bump
+        run: npm ci
+
+      - name: Build
+        if: steps.bump.outputs.bump
+        run: npm run build
 
       - name: Update version
         if: steps.bump.outputs.bump
@@ -44,6 +45,11 @@ jobs:
         id: version
         if: steps.bump.outputs.bump
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Generate changelogs
+        id: changelog
+        if: steps.bump.outputs.bump
+        run: echo "changelogs=$(git log --oneline --no-merges $(git describe --tags --abbrev=0)..HEAD | sed 's/^/- /')" >> $GITHUB_OUTPUT
 
       - name: Commit and tag
         if: steps.bump.outputs.bump
@@ -68,7 +74,8 @@ jobs:
             ${{ github.event.head_commit.message }}
 
             ### Commits
-            $(git log --oneline --no-merges $(git describe --tags --abbrev=0)..HEAD | sed 's/^/- /')
+
+            ${{ steps.changelog.outputs.changelogs }}
           draft: false
           prerelease: false
 
